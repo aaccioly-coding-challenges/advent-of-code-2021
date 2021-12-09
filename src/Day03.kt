@@ -1,29 +1,29 @@
-fun List<IntArray>.mostCommonBitInColumn(columnIndex: Int): UByte {
-    tailrec fun countBitsInColumn(numberOfZeros: Int = 0, numberOfOnes: Int = 0, rowIndex: Int = 0): Pair<Int, Int> {
-        if (rowIndex >= size) {
-            return Pair(numberOfZeros, numberOfOnes)
+fun main() {
+
+    fun readInputAsMatrix(name: String): List<IntArray> =
+        readInput(name).map { string -> string.toCharArray().map { digit -> digit.digitToInt() } }
+            .map { it.toIntArray() }
+
+    fun List<IntArray>.mostCommonBitInColumn(columnIndex: Int): UByte {
+        tailrec fun countBitsInColumn(numberOfZeros: Int = 0, numberOfOnes: Int = 0, rowIndex: Int = 0): Pair<Int, Int> {
+            if (rowIndex >= size) {
+                return Pair(numberOfZeros, numberOfOnes)
+            }
+            return when (this[rowIndex][columnIndex]) {
+                0 -> countBitsInColumn(numberOfZeros + 1, numberOfOnes, rowIndex + 1)
+                1 -> countBitsInColumn(numberOfZeros, numberOfOnes + 1, rowIndex + 1)
+                else -> countBitsInColumn(numberOfZeros, numberOfOnes, rowIndex)
+            }
         }
-        return when (this[rowIndex][columnIndex]) {
-            0 -> countBitsInColumn(numberOfZeros + 1, numberOfOnes, rowIndex + 1)
-            1 -> countBitsInColumn(numberOfZeros, numberOfOnes + 1, rowIndex + 1)
-            else -> countBitsInColumn(numberOfZeros, numberOfOnes, rowIndex)
-        }
+
+        val (zeros, ones) = countBitsInColumn()
+        return if (ones >= zeros) 1u else 0u
     }
 
-    val (zeros, ones) = countBitsInColumn()
-    return if (ones >= zeros) 1u else 0u
-}
+    fun List<IntArray>.leastCommonBitInColumn(columnIndex: Int): UByte {
+        return invertBit(mostCommonBitInColumn((columnIndex)))
+    }
 
-fun List<IntArray>.leastCommonBitInColumn(columnIndex: Int): UByte {
-    return invertBit(mostCommonBitInColumn((columnIndex)))
-}
-
-private fun invertBit(bit: UByte): UByte {
-    val inverted = (bit.toInt() - 1) * -1
-    return inverted.toUByte()
-}
-
-fun main() {
     fun part1(input: List<IntArray>): UInt {
         val nColumns = input[0].size
         val gamma = (0 until nColumns).map { input.mostCommonBitInColumn(it) }.joinToString(separator = "").toUInt(2)
@@ -69,6 +69,3 @@ fun main() {
     println(part1(input))
     println(part2(input))
 }
-
-private fun readInputAsMatrix(name: String): List<IntArray> =
-    readInput(name).map { string -> string.toCharArray().map { digit -> digit.digitToInt() } }.map { it.toIntArray() }
